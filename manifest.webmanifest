@@ -1,7 +1,7 @@
 {
-  "name": "2048 — PWA v6",
+  "name": "2048 — PWA v7",
   "short_name": "2048",
-  "description": "2048 с авто-восстановлением при битом кэше и обновлённым SW-кэшем (v6).",
+  "description": "2048 с плавными перетеканиями и сохранением прогресса.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

@@ -24,7 +24,7 @@
         const keys = await caches.keys();
         await Promise.all(keys.map(k => caches.delete(k)));
       }
-      localStorage.clear();
+      // не чистим localStorage, чтобы сохранить прогресс
       if ('serviceWorker' in navigator){
         const regs = await navigator.serviceWorker.getRegistrations();
         await Promise.all(regs.map(r => r.unregister()));
@@ -50,9 +50,9 @@
     navigator.serviceWorker.register('./sw.js');
   }
 
-  const STORAGE_KEY = 'p2048_state_v6';
-  const BEST_KEY = 'p2048_best_v6';
-  const PREF_KEY = 'p2048_prefs_v6';
+  const STORAGE_KEY = 'p2048_state_v7';
+  const BEST_KEY = 'p2048_best_v7';
+  const PREF_KEY = 'p2048_prefs_v7';
 
   const gridEl = document.getElementById('grid');
   const scoreEl = document.getElementById('score');
@@ -92,6 +92,7 @@
   let SIZE = prefs.size || 4;
   const PROB_4 = 0.1;
   let grid, score, best, undoStack = [];
+  let prevGrid = null; // для анимаций
 
   function isValidGrid(g, size){
     if (!Array.isArray(g) || g.length !== size) return false;
@@ -152,13 +153,14 @@
 
   function start(newGame=false){
     overlay.classList.add('hidden');
-    if (!newGame && loadState()){ draw(); measureLayoutAndSetReserve(); return; }
+    if (!newGame && loadState()){ draw(prevGrid); measureLayoutAndSetReserve(); return; }
     grid = makeEmpty();
     score = 0;
     addRandomTile(grid); addRandomTile(grid);
     undoStack = [];
     best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10);
-    draw();
+    prevGrid = null;
+    draw(null);
     storeState();
     measureLayoutAndSetReserve();
   }
@@ -197,6 +199,7 @@
   }
 
   function move(dir){
+    prevGrid = clone(grid);
     let b = clone(grid);
     let rotated = 0;
     if (dir==='up'){ b = rotate(rotate(rotate(b))); rotated+=3; }
@@ -215,7 +218,7 @@
       storeState();
       undoStack.push({grid: clone(grid), score});
       if (undoStack.length > 1) undoStack = undoStack.slice(-1);
-      draw();
+      draw(prevGrid);
       beep(240, 0.03);
       if (!canMove(grid)) showOverlay('Игра окончена', 'Нет доступных ходов');
     }
@@ -223,7 +226,8 @@
 
   function showOverlay(title, desc){ overlayTitle.textContent = title; overlayDesc.textContent = desc; overlay.classList.remove('hidden'); }
 
-  function draw(){
+  function draw(prev){
+    // guard
     if (!isValidGrid(grid, SIZE)){
       grid = makeEmpty();
       score = 0;
@@ -244,22 +248,66 @@
     const rect = gridEl.getBoundingClientRect();
     const gap = 10;
     const cellSize = (rect.width - (SIZE+1)*gap) / SIZE;
+    const pos = (r,c) => ({
+      left: (gap + c*(cellSize+gap)),
+      top:  (gap + r*(cellSize+gap))
+    });
 
+    // Построим карту позиций из prev по значению (грубое сопоставление)
+    const prevMap = new Map();
+    if (prev && isValidGrid(prev, SIZE)){
+      for (let r=0;r<SIZE;r++){
+        for (let c=0;c<SIZE;c++){
+          const v = prev[r][c];
+          if (!v) continue;
+          const key = String(v);
+          if (!prevMap.get(key)) prevMap.set(key, []);
+          prevMap.get(key).push({r,c,used:false});
+        }
+      }
+    }
+
+    const tiles = [];
     for (let r=0;r<SIZE;r++){
       for (let c=0;c<SIZE;c++){
         const v = grid[r][c];
         if (!v) continue;
-        const tile = document.createElement('div');
-        tile.className = 'tile new';
-        tile.dataset.v = v;
-        tile.style.width = tile.style.height = cellSize + 'px';
-        tile.style.left = (gap + c*(cellSize+gap)) + 'px';
-        tile.style.top  = (gap + r*(cellSize+gap)) + 'px';
-        tile.innerHTML = `<div class="inner">${v}</div>`;
-        tile.addEventListener('animationend', ()=> tile.classList.remove('new'), {once:true});
-        gridEl.appendChild(tile);
+        const t = document.createElement('div');
+        t.className = 'tile';
+        t.dataset.v = v;
+        t.style.width = t.style.height = cellSize + 'px';
+
+        // начальная позиция: из prev, если нашли совпадение по значению
+        let start = pos(r,c);
+        if (prevMap.has(String(v))){
+          const arr = prevMap.get(String(v));
+          const p = arr.find(x => !x.used);
+          if (p){
+            start = pos(p.r, p.c);
+            p.used = true;
+          } else {
+            t.classList.add('new');
+          }
+        } else {
+          t.classList.add('new');
+        }
+
+        t.style.left = start.left + 'px';
+        t.style.top  = start.top  + 'px';
+        t.innerHTML = `<div class="inner">${v}</div>`;
+        tiles.push({el:t, to:pos(r,c)});
+        gridEl.appendChild(t);
       }
     }
+
+    // Во второй кадр переводим в финальные координаты — получится плавное "перетекание"
+    requestAnimationFrame(()=>{
+      tiles.forEach(({el,to})=>{
+        el.style.left = to.left + 'px';
+        el.style.top  = to.top  + 'px';
+      });
+    });
+
     scoreEl.textContent = score;
     bestEl.textContent = best;
   }
@@ -304,13 +352,13 @@
       const last = undoStack.pop();
       grid = last.grid; score = last.score;
       localStorage.setItem(STORAGE_KEY, JSON.stringify({grid, score, size: SIZE}));
-      draw();
+      draw(null);
       overlay.classList.add('hidden');
     }
   });
 
   window.addEventListener('load', ()=>{ gridEl.focus(); measureLayoutAndSetReserve(); start(false); });
-  window.addEventListener('resize', ()=>{ draw(); measureLayoutAndSetReserve(); });
+  window.addEventListener('resize', ()=>{ draw(null); measureLayoutAndSetReserve(); });
 
   function measureLayoutAndSetReserve(){
     const top = (document.querySelector('.topbar')?.offsetHeight || 0);
