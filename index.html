@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>2048 — PWA v4</title>
+  <meta name="theme-color" content="#0f1216">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="left">
+        <h1>2048</h1>
+        <button id="installBtn" class="btn subtle" title="Установить как приложение">Установить</button>
+        <button id="settingsBtn" class="btn subtle" title="Настройки">⚙️</button>
+        <button id="hardReload" class="btn subtle" title="Сбросить кэш и перезагрузить">Перезагрузить</button>
+      </div>
+      <div class="scores">
+        <div class="score"><span class="label">Счёт</span><span id="score">0</span></div>
+        <div class="score"><span class="label">Рекорд</span><span id="best">0</span></div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <button id="newGame" class="btn">Новая игра</button>
+      <button id="undo" class="btn">Шаг назад</button>
+    </div>
+
+    <div id="grid" class="grid" aria-label="Игровое поле" role="grid" tabindex="0"></div>
+
+    <footer class="foot">
+      <p>Управление: стрелки / WASD / свайпы. Работает офлайн, можно установить как приложение (PWA).</p>
+    </footer>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="overlay hidden">
+    <div class="modal">
+      <h2>Настройки</h2>
+      <div class="fields">
+        <label>Размер поля
+          <select id="size">
+            <option value="4">4 × 4 (классика)</option>
+            <option value="5">5 × 5</option>
+            <option value="6">6 × 6</option>
+          </select>
+        </label>
+        <label>Тема
+          <select id="theme">
+            <option value="auto">Авто</option>
+            <option value="dark">Тёмная</option>
+            <option value="light">Светлая</option>
+          </select>
+        </label>
+        <label class="row">
+          <input type="checkbox" id="sound" checked> Звук (слияние/ход)
+        </label>
+      </div>
+      <div class="actions">
+        <button id="closeSettings" class="btn">Закрыть</button>
+        <button id="applySettings" class="btn primary">Применить</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="overlay" class="overlay hidden">
+    <div class="modal">
+      <h2 id="overlayTitle">Игра окончена</h2>
+      <p id="overlayDesc">Нет доступных ходов</p>
+      <button id="tryAgain" class="btn primary">Играть снова</button>
+    </div>
+  </div>
+
+  <div id="crash" class="overlay hidden">
+    <div class="modal">
+      <h2>Произошла ошибка</h2>
+      <pre id="crashMsg" style="white-space:pre-wrap; font-size:12px; text-align:left; background:#0b1220; color:#cbd5e1; padding:8px; border-radius:8px; max-height:220px; overflow:auto;"></pre>
+      <button id="reloadNow" class="btn primary">Перезагрузить</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
