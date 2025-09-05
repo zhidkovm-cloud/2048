@@ -1,5 +1,4 @@
 (() => {
-  // Crash overlay
   const crashEl = document.getElementById('crash');
   const crashMsg = document.getElementById('crashMsg');
   const reloadNow = document.getElementById('reloadNow');
@@ -19,7 +18,6 @@
 
   let deferredPrompt = null;
 
-  // Hard reload
   hardReloadBtn.addEventListener('click', async () => {
     try{
       if ('caches' in window){
@@ -52,9 +50,9 @@
     navigator.serviceWorker.register('./sw.js');
   }
 
-  const STORAGE_KEY = 'p2048_state_v5';
-  const BEST_KEY = 'p2048_best_v5';
-  const PREF_KEY = 'p2048_prefs_v4';
+  const STORAGE_KEY = 'p2048_state_v6';
+  const BEST_KEY = 'p2048_best_v6';
+  const PREF_KEY = 'p2048_prefs_v6';
 
   const gridEl = document.getElementById('grid');
   const scoreEl = document.getElementById('score');
@@ -66,7 +64,6 @@
   const overlayDesc = document.getElementById('overlayDesc');
   const tryAgain = document.getElementById('tryAgain');
 
-  // Preferences
   const prefs = loadPrefs();
   applyTheme(prefs.theme);
   sizeSel.value = String(prefs.size);
@@ -92,12 +89,21 @@
     settingsModal.classList.add('hidden');
   });
 
-  // Game state
   let SIZE = prefs.size || 4;
   const PROB_4 = 0.1;
   let grid, score, best, undoStack = [];
 
-  // Audio
+  function isValidGrid(g, size){
+    if (!Array.isArray(g) || g.length !== size) return false;
+    for (let r=0;r<size;r++){
+      if (!Array.isArray(g[r]) || g[r].length !== size) return false;
+      for (let c=0;c<size;c++){
+        if (typeof g[r][c] !== 'number') return false;
+      }
+    }
+    return true;
+  }
+
   let audioCtx = null;
   function beep(freq=440, dur=0.05){
     if (!soundChk.checked) return;
@@ -131,8 +137,13 @@
       best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10);
       if (raw){
         const obj = JSON.parse(raw);
-        if (obj.size) SIZE = obj.size;
-        grid = obj.grid; score = obj.score;
+        const sz = parseInt((obj && obj.size) || SIZE, 10);
+        if (!Number.isFinite(sz) || sz < 2 || sz > 8) return false;
+        if (!isValidGrid(obj.grid, sz)) return false;
+        if (!Number.isFinite(obj.score)) return false;
+        SIZE = sz;
+        grid = obj.grid;
+        score = obj.score;
         return true;
       }
     }catch(e){}
@@ -213,6 +224,13 @@
   function showOverlay(title, desc){ overlayTitle.textContent = title; overlayDesc.textContent = desc; overlay.classList.remove('hidden'); }
 
   function draw(){
+    if (!isValidGrid(grid, SIZE)){
+      grid = makeEmpty();
+      score = 0;
+      addRandomTile(grid); addRandomTile(grid);
+      storeState();
+    }
+
     gridEl.innerHTML = '';
     gridEl.style.gridTemplateColumns = `repeat(${SIZE}, 1fr)`;
     gridEl.style.gridTemplateRows = `repeat(${SIZE}, 1fr)`;
@@ -262,7 +280,6 @@
   gridEl.addEventListener('click', ()=> gridEl.focus());
   window.addEventListener('pointerdown', ()=> gridEl.focus(), {once:true});
 
-  // Swipe
   let touchStart = null;
   gridEl.addEventListener('touchstart', (e)=>{
     if (e.touches.length === 1){
@@ -292,7 +309,7 @@
     }
   });
 
-  window.addEventListener('load', ()=>{ gridEl.focus(); measureLayoutAndSetReserve(); });
+  window.addEventListener('load', ()=>{ gridEl.focus(); measureLayoutAndSetReserve(); start(false); });
   window.addEventListener('resize', ()=>{ draw(); measureLayoutAndSetReserve(); });
 
   function measureLayoutAndSetReserve(){

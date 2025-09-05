@@ -9,10 +9,7 @@
   --gap:10px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --topReserve: 160px; /* JS пересчитает под реальную высоту шапки/кнопок/футера */
-}
-@media (prefers-color-scheme: light){
-  :root{ --bg:#f3f4f6; --panel:#ffffff; --panel-2:#f3f4f6; --text:#0f172a; --muted:#475569 }
+  --topReserve: 160px;
 }
 html,body{min-height:100%}
 body{
@@ -45,7 +42,6 @@ h1{margin:0; font-size:28px; letter-spacing:.5px}
   display:grid; gap:var(--gap); outline:none;
 }
 .cell{ background:#11161e20; border-radius:12px; width:100%; height:100% }
-body.theme-light .cell{ background:#0f172a10 }
 .tile{
   position:absolute; display:flex; align-items:center; justify-content:center; font-weight:800; border-radius:12px;
   transition: left .28s cubic-bezier(.22,1,.36,1), top .28s cubic-bezier(.22,1,.36,1), transform .28s cubic-bezier(.22,1,.36,1);
@@ -60,7 +56,6 @@ body.theme-light .cell{ background:#0f172a10 }
 .modal{ background:var(--panel); border:1px solid #26314140; padding:22px; border-radius:16px; width:min(92vw,420px); text-align:center }
 .foot{ color:var(--muted); text-align:center; margin:10px 0 14px; font-size:13px }
 
-/* Расцветка плиток */
 .tile[data-v="2"] .inner    {background:#e2e8f0; color:#0f172a}
 .tile[data-v="4"] .inner    {background:#cbd5e1; color:#0f172a}
 .tile[data-v="8"] .inner    {background:#fde68a; color:#111827}
@@ -73,8 +68,3 @@ body.theme-light .cell{ background:#0f172a10 }
 .tile[data-v="1024"] .inner {background:#6366f1; color:white}
 .tile[data-v="2048"] .inner {background:#a855f7; color:white}
 .tile[data-v="4096"] .inner {background:#ef4444; color:white}
-
-@media (max-width: 420px){
-  .btn{padding:12px 14px; font-size:15px}
-  .score{min-width:100px}
-}

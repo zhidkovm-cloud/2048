@@ -1,7 +1,7 @@
 {
-  "name": "2048 — PWA v5",
+  "name": "2048 — PWA v6",
   "short_name": "2048",
-  "description": "2048 с адаптивной раскладкой для iPhone X+, офлайн и установкой как приложение.",
+  "description": "2048 с авто-восстановлением при битом кэше и обновлённым SW-кэшем (v6).",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
