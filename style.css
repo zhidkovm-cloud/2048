@@ -3,61 +3,64 @@
   --bg:#0f1216;
   --panel:#171b22;
   --panel-2:#1c222b;
-  --tile:#222833;
   --text:#e5e7eb;
   --muted:#9ca3af;
   --radius:16px;
   --gap:10px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --topReserve: 160px; /* JS пересчитает под реальную высоту шапки/кнопок/футера */
 }
 @media (prefers-color-scheme: light){
-  :root{ --bg:#f3f4f6; --panel:#ffffff; --panel-2:#f3f4f6; --tile:#e5e7eb; --text:#0f172a; --muted:#475569 }
+  :root{ --bg:#f3f4f6; --panel:#ffffff; --panel-2:#f3f4f6; --text:#0f172a; --muted:#475569 }
 }
 html,body{min-height:100%}
 body{
-  margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
+  margin:0; padding-top: var(--safe-top); padding-bottom: var(--safe-bottom);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
   background: radial-gradient(1200px 800px at 80% -20%, #1f2937, var(--bg));
   color:var(--text);
 }
-.wrap{max-width:560px; margin:16px auto; padding:12px}
-@media (max-width: 420px){
-  .wrap{margin:8px auto; padding:8px}
-}
-.topbar{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:10px}
+.wrap{max-width:560px; margin:0 auto; padding:12px}
+.topbar{display:flex; align-items:center; justify-content:space-between; gap:14px; margin:8px 0 6px}
 .topbar .left{display:flex; gap:8px; align-items:center}
 h1{margin:0; font-size:28px; letter-spacing:.5px}
-.scores{display:flex; gap:8px}
-.score{background:var(--panel); padding:10px 14px; border-radius:var(--radius); text-align:center; min-width:90px; border:1px solid #26314120}
-.score .label{display:block; font-size:12px; color:var(--muted)}
-.score span:last-child{font-weight:700; font-size:18px}
 
-.controls{display:flex; gap:8px; margin:10px 0 16px; flex-wrap:wrap}
+.scorebar{display:flex; align-items:stretch; justify-content:center; gap:10px; margin:6px 0 8px}
+.score{background:var(--panel); padding:10px 14px; border-radius:var(--radius); text-align:center; min-width:110px; border:1px solid #26314120}
+.score .label{display:block; font-size:12px; color:var(--muted)}
+.score span:last-child{font-weight:700; font-size:20px}
+
+.controls{display:flex; gap:8px; margin:8px 0 12px; flex-wrap:wrap; justify-content:center}
 .btn{background:var(--panel); border:1px solid #26314140; color:inherit; padding:10px 14px; border-radius:12px; cursor:pointer}
 .btn:hover{border-color:#33415580}
 .btn.primary{background:linear-gradient(135deg, #22c55e, #16a34a); border:none; color:white}
 .btn.subtle{background:transparent; border-color:transparent; padding:6px 10px}
 
+.gridWrap{ display:flex; align-items:center; justify-content:center; }
 .grid{
   position:relative; background:var(--panel-2); border-radius:var(--radius); padding:var(--gap);
-  width:100%; aspect-ratio: 1 / 1; max-width:560px; margin:0 auto;
+  width:min(92vw, 560px); height:min(92vw, calc(100svh - var(--topReserve)));
+  aspect-ratio: 1 / 1;
   display:grid; gap:var(--gap); outline:none;
 }
 .cell{ background:#11161e20; border-radius:12px; width:100%; height:100% }
 body.theme-light .cell{ background:#0f172a10 }
 .tile{
   position:absolute; display:flex; align-items:center; justify-content:center; font-weight:800; border-radius:12px;
-  transition: left .25s cubic-bezier(.22,1,.36,1), top .25s cubic-bezier(.22,1,.36,1), transform .25s cubic-bezier(.22,1,.36,1);
+  transition: left .28s cubic-bezier(.22,1,.36,1), top .28s cubic-bezier(.22,1,.36,1), transform .28s cubic-bezier(.22,1,.36,1);
   will-change: transform, left, top; box-shadow: 0 6px 16px rgba(0,0,0,.35);
 }
 .tile .inner{display:flex; align-items:center; justify-content:center; width:100%; height:100%; border-radius:inherit; background:#334155; color:#fff}
-.tile.new{animation: pop .25s ease}
+.tile.new{animation: pop .28s ease}
 @keyframes pop{ 0%{transform:scale(0.6)} 60%{transform:scale(1.06)} 100%{transform:scale(1)} }
 
 .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center }
 .hidden{display:none}
 .modal{ background:var(--panel); border:1px solid #26314140; padding:22px; border-radius:16px; width:min(92vw,420px); text-align:center }
-.foot{ color:var(--muted); text-align:center; margin-top:14px; font-size:13px }
+.foot{ color:var(--muted); text-align:center; margin:10px 0 14px; font-size:13px }
 
-/* Tile coloring */
+/* Расцветка плиток */
 .tile[data-v="2"] .inner    {background:#e2e8f0; color:#0f172a}
 .tile[data-v="4"] .inner    {background:#cbd5e1; color:#0f172a}
 .tile[data-v="8"] .inner    {background:#fde68a; color:#111827}
@@ -73,5 +76,5 @@ body.theme-light .cell{ background:#0f172a10 }
 
 @media (max-width: 420px){
   .btn{padding:12px 14px; font-size:15px}
-  .score{min-width:84px}
+  .score{min-width:100px}
 }

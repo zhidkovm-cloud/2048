@@ -16,8 +16,10 @@
   const soundChk = document.getElementById('sound');
   const installBtn = document.getElementById('installBtn');
   const hardReloadBtn = document.getElementById('hardReload');
+
   let deferredPrompt = null;
 
+  // Hard reload
   hardReloadBtn.addEventListener('click', async () => {
     try{
       if ('caches' in window){
@@ -50,9 +52,9 @@
     navigator.serviceWorker.register('./sw.js');
   }
 
-  const STORAGE_KEY = 'p2048_state_v4';
-  const BEST_KEY = 'p2048_best_v4';
-  const PREF_KEY = 'p2048_prefs_v3';
+  const STORAGE_KEY = 'p2048_state_v5';
+  const BEST_KEY = 'p2048_best_v5';
+  const PREF_KEY = 'p2048_prefs_v4';
 
   const gridEl = document.getElementById('grid');
   const scoreEl = document.getElementById('score');
@@ -64,6 +66,7 @@
   const overlayDesc = document.getElementById('overlayDesc');
   const tryAgain = document.getElementById('tryAgain');
 
+  // Preferences
   const prefs = loadPrefs();
   applyTheme(prefs.theme);
   sizeSel.value = String(prefs.size);
@@ -89,6 +92,7 @@
     settingsModal.classList.add('hidden');
   });
 
+  // Game state
   let SIZE = prefs.size || 4;
   const PROB_4 = 0.1;
   let grid, score, best, undoStack = [];
@@ -137,7 +141,7 @@
 
   function start(newGame=false){
     overlay.classList.add('hidden');
-    if (!newGame && loadState()){ draw(); return; }
+    if (!newGame && loadState()){ draw(); measureLayoutAndSetReserve(); return; }
     grid = makeEmpty();
     score = 0;
     addRandomTile(grid); addRandomTile(grid);
@@ -145,6 +149,7 @@
     best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10);
     draw();
     storeState();
+    measureLayoutAndSetReserve();
   }
 
   function canMove(board){
@@ -287,8 +292,16 @@
     }
   });
 
-  window.addEventListener('load', ()=>{ gridEl.focus(); });
-  window.addEventListener('resize', draw);
+  window.addEventListener('load', ()=>{ gridEl.focus(); measureLayoutAndSetReserve(); });
+  window.addEventListener('resize', ()=>{ draw(); measureLayoutAndSetReserve(); });
 
-  start(false);
+  function measureLayoutAndSetReserve(){
+    const top = (document.querySelector('.topbar')?.offsetHeight || 0);
+    const sb  = (document.getElementById('scorebar')?.offsetHeight || 0);
+    const ctr = (document.querySelector('.controls')?.offsetHeight || 0);
+    const foot= (document.querySelector('.foot')?.offsetHeight || 0);
+    const margins = 40;
+    const reserve = top + sb + ctr + foot + margins;
+    document.documentElement.style.setProperty('--topReserve', reserve + 'px');
+  }
 })();

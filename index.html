@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <title>2048 — PWA v4</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>2048 — PWA v5</title>
   <meta name="theme-color" content="#0f1216">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -13,16 +13,17 @@
 </head>
 <body>
   <div class="wrap">
+    <section id="scorebar" class="scorebar">
+      <div class="score"><span class="label">Счёт</span><span id="score">0</span></div>
+      <div class="score"><span class="label">Рекорд</span><span id="best">0</span></div>
+    </section>
+
     <header class="topbar">
       <div class="left">
         <h1>2048</h1>
         <button id="installBtn" class="btn subtle" title="Установить как приложение">Установить</button>
         <button id="settingsBtn" class="btn subtle" title="Настройки">⚙️</button>
         <button id="hardReload" class="btn subtle" title="Сбросить кэш и перезагрузить">Перезагрузить</button>
-      </div>
-      <div class="scores">
-        <div class="score"><span class="label">Счёт</span><span id="score">0</span></div>
-        <div class="score"><span class="label">Рекорд</span><span id="best">0</span></div>
       </div>
     </header>
 
@@ -31,7 +32,9 @@
       <button id="undo" class="btn">Шаг назад</button>
     </div>
 
-    <div id="grid" class="grid" aria-label="Игровое поле" role="grid" tabindex="0"></div>
+    <div id="gridWrap" class="gridWrap">
+      <div id="grid" class="grid" aria-label="Игровое поле" role="grid" tabindex="0"></div>
+    </div>
 
     <footer class="foot">
       <p>Управление: стрелки / WASD / свайпы. Работает офлайн, можно установить как приложение (PWA).</p>

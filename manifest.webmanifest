@@ -1,7 +1,7 @@
 {
-  "name": "2048 — PWA v4",
+  "name": "2048 — PWA v5",
   "short_name": "2048",
-  "description": "2048 с настройками, звуком и офлайн-режимом (v4).",
+  "description": "2048 с адаптивной раскладкой для iPhone X+, офлайн и установкой как приложение.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
